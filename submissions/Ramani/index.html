@@ -2,6 +2,7 @@
 <head>
 <title>Project 0</title>
 <style type="text/css" href="project0.css"></style>
+<link rel="stylesheet" type="text/css" href="project0.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <!--Put your D3 import statement between these two lines-->
     <script src="https://d3js.org/d3.v3.min.js"></script>
@@ -29,12 +30,31 @@
     <div id="partFive">
         <h1>Part Five: </h1>
         <div id="scatterplotSet">
+            <p id="scatterSetLabel"></p>
+            <div id="one" style="float: left;"></div>
+            <div id="two" style="float: left;"></div>
+            <div id="three" style="float: left;"></div>
+            <div id="four" style="float: left;"></div>
         </div>
 	</div>
     
     <script type="text/javascript">
         // Put your part one code here ***********************
-
+        d3.csv("./data/anscombe_I.csv", function(csvData) {
+            checkDataset(csvData);
+        });
+        
+        d3.csv("./data/anscombe_II.csv", function(csvData) {
+            checkDataset(csvData);
+        });
+        
+        d3.csv("./data/anscombe_III.csv", function(csvData) {
+            checkDataset(csvData);
+        });
+        
+        d3.csv("./data/anscombe_IV.csv", function(csvData) {
+            checkDataset(csvData);
+        });
         
         // Leave this to test your data uploading. All data uploading should be above this line
         function checkDataset(dataset) {
@@ -46,10 +66,160 @@
         
         // Put your part two code here ***********************
         
+        var w = 740; // Width of our visualization
+        var h = 540; // Height of our visualization
+        var xOffset = 100; // Space for x-axis labels
+        var yOffset = 50; // Space for y-axis labels
+        var margin = 20; // Margin around visualization
+        var vals = ['x', 'y']; // List of data attributes
+        var xVal = vals[0]; // Value to plot on x-axis
+        var yVal = vals[1]; // Value to plot on y-axis
+        
+        d3.csv("./data/anscombe_I.csv", function(csvData) {
+            var data = csvData;
+            var svg = d3.select("#barchart").append("svg:svg")
+                                    .attr("width", w)
+                                    .attr("height", h);
+            
+            var xScale = d3.scale.linear()
+                            .domain([0, data.length+1])
+                            .range([xOffset , w - 2*margin]);
+            
+            var yScale = d3.scale.linear()
+                           .domain([0, 
+                                    d3.max(data, function(d) {
+                                    return parseFloat(d[xVal]);})+1])
+                           .range([h - yOffset - margin, margin]);
+            
+            var xAxis = d3.svg.axis()
+                              .scale(xScale)
+                              .orient("bottom")
+                              .ticks(11);
+
+            var xAxisG = svg.append('g')
+                            .attr('class', 'axis')
+                            .attr('transform', 'translate(0, ' + (h - yOffset - margin) + ')')
+                            .call(xAxis);
+
+            var xLabel = svg.append("text")
+                            .attr('class', 'label')
+                            .attr('x', w/2)
+                            .attr('y', h - margin/2)
+                            .text(xVal);
+
+            var yAxis = d3.svg.axis()
+                              .scale(yScale)
+                              .orient("left")
+                              .ticks(7);
+                            
+            var yAxisG = svg.append('g')
+                            .attr('class', 'axis')
+                            .attr('transform', 'translate(' + xOffset + ', 0)')
+                            .call(yAxis);
+
+            var yLabel = svg.append("text")
+                            .attr('class', 'label')
+                            .attr('x', xOffset/2)
+                            .attr('y', h/2)
+                            .text(yVal);
+            
+              svg.selectAll("rect")
+                  .data(data)
+                  .enter().append("rect")
+                  .style("fill", "steelblue")
+                  .attr("x", function(d, i) { return xScale(i+1) - 15; })
+                  .attr("y", function(d) { return yScale(d[xVal]); })
+                  .attr("width" , 30)
+                  .attr("height", function(d) { return d[xVal]*30; });
+
+        });
+        
         // Put your part three & four code here ***********************
         
-        // Put your part five code here ***********************
+        plotScatter("./data/anscombe_I.csv", "#scatterplot", "#scatterLabel", "Anscombe", w, h);
         
+        function plotScatter(fileName, divName, parIdName, labelName, wdth, hght) {
+            
+            d3.csv(fileName, function(csvData) {
+            var data = csvData;
+            var svg = d3.select(divName).append("svg:svg")
+                                    .attr("width", wdth)
+                                    .attr("height", hght);
+            
+             svg.append("text")
+                .attr("x", (wdth / 2))             
+                .attr("y", margin)
+                .attr("text-anchor", "middle")  
+                .style("font-size", "20px")  
+                .text(labelName);
+
+            var xScale = d3.scale.linear()
+                            .domain([d3.min(data, function(d) {
+                                    return parseFloat(d[xVal]);})-1, 
+                                     d3.max(data, function(d) {
+                                    return parseFloat(d[xVal]);})+1])
+                            .range([xOffset , wdth - 2*margin])
+            
+            var xAxis = d3.svg.axis()
+                              .scale(xScale)
+                              .orient("bottom")
+                              .ticks(11);
+
+            var xAxisG = svg.append('g')
+                            .attr('class', 'axis')
+                            .attr('transform', 'translate(0, ' + (hght - yOffset - margin) + ')')
+                            .call(xAxis);
+
+            var xLabel = svg.append("text")
+                            .attr('class', 'label')
+                            .attr('x', wdth/2)
+                            .attr('y', hght - margin/2)
+                            .text(xVal);
+
+            var yScale = d3.scale.linear()
+                           .domain([d3.min(data, function(d) {
+                                    return parseFloat(d[yVal]);})-1, 
+                                    d3.max(data, function(d) {
+                                    return parseFloat(d[yVal]);})+1])
+                           .range([hght - yOffset - margin, margin]);
+            
+            var yAxis = d3.svg.axis()
+                              .scale(yScale)
+                              .orient("left")
+                              .ticks(7);
+                            
+            var yAxisG = svg.append('g')
+                            .attr('class', 'axis')
+                            .attr('transform', 'translate(' + xOffset + ', 0)')
+                            .call(yAxis);
+
+            var yLabel = svg.append("text")
+                            .attr('class', 'label')
+                            .attr('x', xOffset/2)
+                            .attr('y', hght/2)
+                            .text(yVal);
+            
+            svg.selectAll(".dot")
+                .data(data)
+                .enter().append("circle")
+                .attr("class", "dot")
+                .attr("r", 5)
+                .attr("cx", function(d) { return xScale(d[xVal]); })
+                .attr("cy", function(d) { return yScale(d[yVal]); })
+                .attr("fill", "blue")
+                .on("mouseover", function(d) { d3.select(this).style("fill", "red"); })
+                .on("mouseout", function(d) { d3.select(this).style("fill", "blue"); })
+                .on("click", function(d) { d3.select(parIdName).text(d[xVal]+","+d[yVal]) });
+
+            });
+        }
+       
+        
+        // Put your part five code here ***********************
+        plotScatter("./data/anscombe_I.csv", "#one", "#scatterSetLabel", "Anscombe I", 400, 300);
+        plotScatter("./data/anscombe_II.csv", "#two", "#scatterSetLabel", "Anscombe II", 400, 300);
+        plotScatter("./data/anscombe_III.csv", "#three","#scatterSetLabel", "Anscombe III", 400, 300);
+        plotScatter("./data/anscombe_IV.csv", "#four","#scatterSetLabel", "Anscombe IV", 400, 300);
     </script>
 </body>
 
